@@ -3,7 +3,7 @@
  *
  *   node scripts/ingest-publications.mjs [--refresh]
  *
- * Pipeline (per publications-ingestion.md):
+ * Pipeline (per seed/publications-ingestion.md):
  *   1. Seed list (scripts/data/publications.mjs) = authoritative completeness.
  *   2. ORCID public API = primary source of DOIs / canonical links.
  *   3. Crossref REST API = backfill DOIs for seed items ORCID didn't cover.

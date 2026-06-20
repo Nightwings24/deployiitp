@@ -1,7 +1,7 @@
-# Dr. Prashant Kumar Srivastava — Academic Portfolio
+# Dr. Prashant Kumar Srivastava - Academic Portfolio
 
 A fast, accessible, easy-to-maintain personal academic website for
-**Dr. Prashant Kumar Srivastava** — Associate Professor & Head, Department of
+**Dr. Prashant Kumar Srivastava** - Associate Professor & Head, Department of
 Mathematics, IIT Patna. Built as a lifelong **portfolio** (roles and titles are
 data with dates, so the site survives every role change), not a fixed
 "position page".
@@ -10,7 +10,7 @@ data with dates, so the site survives every role change), not a fixed
 |---|---|
 | **Framework** | [Astro 5](https://astro.build) (static output, ~zero JavaScript) |
 | **Styling** | Tailwind CSS v4 + design tokens, self-hosted fonts |
-| **Content** | Astro Content Collections (Markdown / YAML in Git — no database) |
+| **Content** | Astro Content Collections (Markdown / YAML in Git - no database) |
 | **Editor** | [Keystatic](https://keystatic.com) mounted at `/keystatic` on the same site |
 | **Lighthouse** | **Performance 97–100 · Accessibility 100 · Best Practices 100 · SEO 100** |
 
@@ -38,7 +38,7 @@ Common tasks, each under a minute:
 | **Add your CV** | Put `CV.pdf` in the `public` folder, then *Your profile* → **CV file path** → `/CV.pdf`. A “CV” button appears automatically. |
 
 > In local development your edits save straight to the files. In production you
-> can connect the editor to GitHub so saves commit and redeploy automatically —
+> can connect the editor to GitHub so saves commit and redeploy automatically -
 > see [Editing the live site](#editing-the-live-site).
 
 ---
@@ -73,13 +73,13 @@ src/
 │   ├─ research/*.mdoc         research themes (rich text)
 │   └─ news/*.yaml             updates
 ├─ lib/            content loaders, formatting, BibTeX, author-emphasis helpers
-└─ styles/         global.css — design tokens + base styles
+└─ styles/         global.css - design tokens + base styles
 scripts/           content ingestion + dev QA tools (see below)
 keystatic.config.ts  the editor schema (mirrors the content model)
 ```
 
 Everything that can change over time is **data**. Changing a title, adding a
-paper, or graduating a student is a one-field edit — never a code change.
+paper, or graduating a student is a one-field edit - never a code change.
 
 ---
 
@@ -93,9 +93,9 @@ node scripts/ingest-publications.mjs            # uses cached API responses
 node scripts/ingest-publications.mjs --refresh  # re-query ORCID + Crossref
 ```
 
-1. **Seed list** (`scripts/data/publications.mjs`) — defines completeness (67 works).
-2. **ORCID** (`0000-0002-7651-5639`) — primary source of DOIs and types.
-3. **Crossref** — backfills DOIs for anything ORCID is missing, with strict
+1. **Seed list** (`scripts/data/publications.mjs`) - defines completeness (67 works).
+2. **ORCID** (`0000-0002-7651-5639`) - primary source of DOIs and types.
+3. **Crossref** - backfills DOIs for anything ORCID is missing, with strict
    matching (title similarity + author + year) so nothing weak is auto-accepted.
 
 It writes `src/content/publications/*.yaml` and a human-readable report,
@@ -110,7 +110,7 @@ you can also just edit everything in Keystatic.
 
 ## 🌐 Deployment
 
-The public site is **fully static** — deploy `dist/` to any host:
+The public site is **fully static** - deploy `dist/` to any host:
 
 - **Netlify / Vercel / Cloudflare Pages / GitHub Pages.** Build command
   `npm run build`, publish directory `dist`.
@@ -133,7 +133,7 @@ commit to the repo and trigger a redeploy:
    GitHub account can edit. The public pages stay static.
 
 Until then, the recommended workflow is: edit locally at `/keystatic`, commit,
-push — the host rebuilds automatically.
+push - the host rebuilds automatically.
 
 ---
 
@@ -153,7 +153,7 @@ Treated as features, not checkboxes, and verified:
 
 ### Dev QA helpers (optional)
 
-`scripts/measure.mjs`, `scripts/cdp-check.mjs` — connect to a Chrome/Edge running
+`scripts/measure.mjs`, `scripts/cdp-check.mjs` - connect to a Chrome/Edge running
 with `--remote-debugging-port=9222` to check layout overflow and render a page’s
 text/console for verification. Not part of the build.
 
