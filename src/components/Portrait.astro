@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/portrait.jpg';
+import { profile, fullName } from '../lib/profile';
+
+interface Props {
+  size?: number;
+  eager?: boolean;
+  class?: string;
+}
+const { size = 220, eager = false, class: className = '' } = Astro.props;
+
+// Render dimensions are capped at 2× the source (241×256) to avoid upscaling blur.
+const alt = `Portrait of ${fullName}`;
+// If the editor sets a custom photo path (under /public), use it; otherwise the
+// bundled, build-optimized asset.
+const override = profile.photo?.trim();
+---
+
+<div class={`portrait ${className}`} style={`--portrait-size:${size}px`}>
+  {
+    override ? (
+      <img src={override} alt={alt} width={size} height={size} loading={eager ? 'eager' : 'lazy'} />
+    ) : (
+      <Image
+        src={portrait}
+        alt={alt}
+        width={Math.min(size * 2, portrait.width)}
+        height={Math.min(size * 2, portrait.height)}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    )
+  }
+</div>
+
+<style>
+  .portrait {
+    width: var(--portrait-size);
+    height: var(--portrait-size);
+    flex: none;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-card);
+  }
+  .portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: block;
+  }
+</style>

@@ -1,0 +1,260 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Button from '../components/Button.astro';
+import ProfileLinks from '../components/ProfileLinks.astro';
+import { profile, fullName } from '../lib/profile';
+---
+
+<BaseLayout
+  pageTitle="Contact"
+  description={`Contact ${fullName} at ${profile.institution} - email, phone, lab address, and academic profiles.`}
+>
+  <div class="container-prose page-intro">
+    <p class="eyebrow">Contact</p>
+    <h1>Get in touch</h1>
+    <p class="intro-lead">
+      The quickest way to reach me is by email. Prospective PhD students are welcome to write - please
+      read the note below first.
+    </p>
+  </div>
+
+  <div class="container-page contact-grid">
+    <div class="contact-main">
+      <div class="contact-card">
+        <h2 class="contact-h2">Email</h2>
+        <div class="email-row">
+          <a class="email-link" href={`mailto:${profile.email}`}>{profile.email}</a>
+          <button class="copy-btn js-copy-email" data-email={profile.email} aria-label="Copy email address">
+            <Icon name="copy" size={16} />
+            <span class="copy-label" aria-live="polite">Copy</span>
+          </button>
+        </div>
+        {profile.phone && (
+          <p class="phone">
+            <Icon name="phone" size={16} /> <a href={`tel:${profile.phone.replace(/[^+\d]/g, '')}`}>{profile.phone}</a>
+          </p>
+        )}
+      </div>
+
+      <div class="contact-card">
+        <h2 class="contact-h2">Lab address</h2>
+        <address class="address">
+          <Icon name="location" size={18} class="addr-icon" />
+          <span>
+            <strong>{profile.labName}</strong><br />
+            {profile.addressLines.map((line, i) => (
+              <>{line}{i < profile.addressLines.length - 1 ? <br /> : null}</>
+            ))}
+          </span>
+        </address>
+        <Button
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('IIT Patna, Bihta, Patna, Bihar 801106')}`}
+          variant="secondary"
+          size="sm"
+          icon="location"
+          external={true}
+        >
+          View on map
+        </Button>
+      </div>
+
+      <div class="contact-card phd-note">
+        <h2 class="contact-h2">A note for prospective PhD students</h2>
+        <p>{profile.phdNote}</p>
+      </div>
+    </div>
+
+    <aside class="contact-aside">
+      <div class="contact-card">
+        <h2 class="contact-h2">Academic profiles</h2>
+        <ProfileLinks variant="labeled" />
+      </div>
+
+      {
+        profile.secondaryLinks.length > 0 && (
+          <div class="contact-card">
+            <h2 class="contact-h2">Indexing &amp; IDs</h2>
+            <ul class="secondary-links">
+              {profile.secondaryLinks.map((l) => (
+                <li>
+                  <a href={l.url} target="_blank" rel="noopener noreferrer">
+                    {l.label} <Icon name="arrow-up-right" size={13} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-intro {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1rem;
+  }
+  .page-intro h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+  .intro-lead {
+    margin-top: 1rem;
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) 20rem;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    padding-block: 2rem 1rem;
+    align-items: start;
+  }
+  .contact-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .contact-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .contact-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+  .contact-h2 {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-ink-faint);
+    margin-bottom: 1rem;
+  }
+
+  .email-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .email-link {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    color: var(--color-link);
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .email-link:hover {
+    text-decoration: underline;
+  }
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+    background: var(--color-surface-soft);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+  }
+  .copy-btn:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .phone {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 1rem;
+    color: var(--color-ink-soft);
+  }
+  .phone a {
+    color: var(--color-ink-soft);
+    text-decoration: none;
+  }
+  .phone a:hover {
+    color: var(--color-link);
+  }
+
+  .address {
+    display: flex;
+    gap: 0.65rem;
+    font-style: normal;
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+    margin-bottom: 1.1rem;
+  }
+  .address strong {
+    color: var(--color-ink);
+  }
+  .address :global(.addr-icon) {
+    color: var(--color-accent);
+    margin-top: 0.2rem;
+  }
+
+  .phd-note {
+    background: var(--color-primary-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+  .phd-note p {
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+
+  .secondary-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .secondary-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+  }
+  .secondary-links a:hover {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+
+  @media (max-width: 56rem) {
+    .contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Copy email to clipboard.
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('.js-copy-email') as HTMLElement | null;
+    if (!btn) return;
+    const email = btn.getAttribute('data-email');
+    if (!email) return;
+    const label = btn.querySelector('.copy-label');
+    navigator.clipboard?.writeText(email).then(() => {
+      if (label) label.textContent = 'Copied!';
+      window.setTimeout(() => {
+        if (label) label.textContent = 'Copy';
+      }, 1800);
+    });
+  });
+</script>

@@ -1,0 +1,42 @@
+{
+  "name": "Prashant Kumar Srivastava",
+  "honorific": "Dr.",
+  "shortName": "Prashant K. Srivastava",
+  "tagline": "Mathematical modelling of biological systems & nonlinear dynamics",
+  "researchSummary": "I build and analyse mathematical models of biological systems - epidemiology and ecology - using ordinary, delay, and stochastic differential equations, to understand the nonlinear dynamics that govern how diseases spread and populations interact.",
+  "email": "pksri@iitp.ac.in",
+  "phone": "+91-6115-233033",
+  "addressLines": [
+    "Room 516, Block-I",
+    "Department of Mathematics",
+    "IIT Patna, Bihta",
+    "Patna-801106, Bihar, India"
+  ],
+  "labName": "Mathematical Modeling Lab",
+  "department": "Department of Mathematics",
+  "institution": "Indian Institute of Technology Patna",
+  "photo": "",
+  "cv": "",
+  "phdNote": "I am looking for motivated PhD students interested in mathematical modelling, epidemiology, ecology, and nonlinear dynamics. To be considered, you must have qualified GATE or hold external funding (e.g. UGC/CSIR). If the work of the group interests you, please write to me.",
+  "nameVariants": [
+    "Prashant Kumar Srivastava",
+    "Prashant K. Srivastava",
+    "Prashant K Srivastava",
+    "P. K. Srivastava",
+    "P.K. Srivastava",
+    "PK Srivastava",
+    "P K Srivastava"
+  ],
+  "links": [
+    { "label": "Email", "url": "mailto:pksri@iitp.ac.in", "icon": "email" },
+    { "label": "Google Scholar", "url": "https://scholar.google.com/citations?user=Oh65NLAAAAAJ", "icon": "scholar" },
+    { "label": "ORCID", "url": "https://orcid.org/0000-0002-7651-5639", "icon": "orcid" },
+    { "label": "ResearchGate", "url": "https://www.researchgate.net/profile/Prashant-Srivastava-21", "icon": "researchgate" },
+    { "label": "LinkedIn", "url": "https://www.linkedin.com/in/pksri-iitp/", "icon": "linkedin" }
+  ],
+  "secondaryLinks": [
+    { "label": "Scopus Author ID", "url": "https://www.scopus.com/authid/detail.uri?authorId=26634574100" },
+    { "label": "Web of Science ResearcherID", "url": "https://www.webofscience.com/wos/author/record/AAA-9169-2019" },
+    { "label": "IIT Patna research profile (IRINS)", "url": "https://iitp.irins.org/profile/99958" }
+  ]
+}

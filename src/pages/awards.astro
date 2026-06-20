@@ -1,0 +1,217 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { getAwards, getPositionsByCategory } from '../lib/content';
+import { formatRange, formatAwardYears } from '../lib/format';
+import { fullName } from '../lib/profile';
+
+const awards = await getAwards();
+const administrative = await getPositionsByCategory('administrative');
+const society = await getPositionsByCategory('professional-society');
+
+const CATEGORY_LABEL: Record<string, string> = {
+  award: 'Award',
+  honor: 'Honour',
+  fellowship: 'Fellowship',
+  'society-role': 'Society role',
+};
+---
+
+<BaseLayout
+  pageTitle="Awards & Service"
+  description={`Awards, honours and fellowships of ${fullName}, and a record of administrative and professional-society service.`}
+>
+  <div class="container-page page-intro">
+    <p class="eyebrow">Recognition &amp; Service</p>
+    <h1>Awards &amp; Service</h1>
+    <p class="intro-lead">
+      Honours and fellowships, alongside a record of academic administration and service to the
+      mathematical-biology community.
+    </p>
+  </div>
+
+  <div class="container-page awards-body">
+    <!-- Awards & honours -->
+    <section aria-labelledby="awards-heading" class="awards-section">
+      <h2 id="awards-heading" class="section-h2"><Icon name="quote" size={20} /> Awards &amp; honours</h2>
+      <ul class="timeline">
+        {
+          awards.map((a) => (
+            <li class="timeline-item">
+              <span class="timeline-year">{formatAwardYears(a)}</span>
+              <div class="timeline-body">
+                <p class="timeline-title">
+                  {a.title}
+                  <span class="timeline-badge">{CATEGORY_LABEL[a.category]}</span>
+                </p>
+                {a.org && <p class="timeline-org">{a.org}</p>}
+                {a.note && <p class="timeline-note">{a.note}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Professional society service -->
+    <section aria-labelledby="society-heading" class="awards-section">
+      <h2 id="society-heading" class="section-h2"><Icon name="grid" size={20} /> Professional-society service</h2>
+      <ul class="timeline">
+        {
+          society.map((s) => (
+            <li class="timeline-item">
+              <span class="timeline-year">{formatRange(s.startDate, s.endDate, s.isCurrent)}</span>
+              <div class="timeline-body">
+                <p class="timeline-title">{s.title}</p>
+                <p class="timeline-org">
+                  {s.url ? (
+                    <a href={s.url} target="_blank" rel="noopener noreferrer">
+                      {s.organization} <Icon name="arrow-up-right" size={13} />
+                    </a>
+                  ) : (
+                    s.organization
+                  )}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <!-- Administrative service -->
+    <section aria-labelledby="admin-heading" class="awards-section">
+      <h2 id="admin-heading" class="section-h2"><Icon name="filter" size={20} /> Institute &amp; department service</h2>
+      <ul class="timeline">
+        {
+          administrative.map((p) => (
+            <li class="timeline-item">
+              <span class="timeline-year">{formatRange(p.startDate, p.endDate, p.isCurrent)}</span>
+              <div class="timeline-body">
+                <p class="timeline-title">{p.title}</p>
+                <p class="timeline-org">{p.organization}</p>
+                {p.note && <p class="timeline-note">{p.note}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-intro {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1rem;
+  }
+  .page-intro h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+  .intro-lead {
+    margin-top: 1rem;
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+
+  .awards-body {
+    padding-block: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 5vw, 3.75rem);
+  }
+  /* Every section is full width and stacked; its list flows in two columns
+     (like Awards & honours), collapsing to one column on narrow screens. */
+  .awards-section .timeline {
+    columns: 2;
+    column-gap: 3rem;
+  }
+  .awards-section .timeline-item {
+    break-inside: avoid;
+  }
+
+  .section-h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--text-xl);
+    color: var(--color-ink);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .section-h2 :global(.icon) {
+    color: var(--color-accent);
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .timeline-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+  }
+  .timeline-year {
+    flex: none;
+    width: 6.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    padding-top: 0.15rem;
+    line-height: 1.4;
+  }
+  .timeline-title {
+    font-weight: 600;
+    color: var(--color-ink);
+    line-height: 1.4;
+  }
+  .timeline-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-ink-faint);
+    background: var(--color-surface-soft);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    vertical-align: middle;
+  }
+  .timeline-org {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+    margin-top: 0.1rem;
+  }
+  .timeline-org a {
+    color: var(--color-link);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .timeline-org a:hover {
+    text-decoration: underline;
+  }
+  .timeline-note {
+    font-size: 0.85rem;
+    color: var(--color-ink-faint);
+    margin-top: 0.2rem;
+  }
+
+  @media (max-width: 48rem) {
+    .awards-section .timeline {
+      columns: 1;
+    }
+    .timeline-year {
+      width: 5.5rem;
+    }
+  }
+</style>

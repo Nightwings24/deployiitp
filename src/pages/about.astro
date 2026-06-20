@@ -1,0 +1,260 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Portrait from '../components/Portrait.astro';
+import Icon from '../components/Icon.astro';
+import Button from '../components/Button.astro';
+import { profile, fullName } from '../lib/profile';
+import { formatRange } from '../lib/format';
+import { getPositionsByCategory, getAwards } from '../lib/content';
+
+const society = await getPositionsByCategory('professional-society');
+const appointment = (await getPositionsByCategory('appointment'))[0];
+const awards = await getAwards();
+const fellowships = awards.filter((a) => a.category === 'fellowship');
+const nasi = awards.find((a) => a.title.includes('NASI') || a.org?.includes('NASI'));
+---
+
+<BaseLayout pageTitle="About" description={`About ${fullName} - research story, interests, and academic affiliations in mathematical modelling, epidemiology and nonlinear dynamics.`}>
+  <div class="container-page page-intro">
+    <p class="eyebrow">About</p>
+    <h1>The work, and what drives it</h1>
+    <p class="intro-lead">
+      A short introduction to my research - what I work on and why it matters - with my academic
+      appointments and affiliations alongside.
+    </p>
+  </div>
+
+  <div class="container-page about-grid">
+    <article class="prose-body about-body">
+      <p class="lead">
+        I am a mathematician who builds models of living systems. My research sits at the meeting point
+        of <strong>applied mathematics and biology</strong> - using differential equations to understand
+        how infectious diseases spread, how populations interact, and how a virus and the immune system
+        contend inside a single patient.
+      </p>
+
+      <p>
+        The thread running through all of it is <em>nonlinear dynamics</em>. Real biological systems
+        rarely move in straight lines: small changes can tip them from a calm steady state into
+        sustained oscillations, and feedback - people reacting to information about a disease, predators
+        responding to one another, the immune system lagging behind an infection - can reshape an
+        outcome entirely. I am interested in capturing those mechanisms honestly in a model and then
+        analysing what they imply, with the tools of stability theory, bifurcation analysis, and
+        optimal control.
+      </p>
+
+      <p>
+        My early work centred on the <strong>in-host dynamics of HIV</strong> - the interplay of the
+        virus, CD4+ T cells and the immune response, and how drug therapy and time delays change the
+        course of an infection. From there the work broadened into <strong>mathematical epidemiology</strong>:
+        modelling how information, screening, vaccination and limited treatment shape the spread of
+        diseases from tuberculosis and dengue to COVID-19, and how to choose interventions that actually
+        change the result. In parallel, my group studies <strong>ecological models</strong> - predator–prey
+        systems with fear, cooperation and harvesting - and contributes to a distinct strand of
+        <strong> coding theory</strong>, designing the complementary code sets that keep wireless systems
+        interference-free.
+      </p>
+
+      <p>
+        I lead the <strong>{profile.labName}</strong> at {profile.institution}, where I work with PhD,
+        master's and undergraduate students. What I care about as an advisor is the same thing I care
+        about in a paper: clarity. A model should be only as complicated as the biology demands, its
+        analysis should be rigorous, and its conclusions should be stated plainly enough to be useful.
+      </p>
+
+      <h2>Research interests</h2>
+      <ul>
+        <li>Mathematical modelling of biological systems - epidemiology and ecology</li>
+        <li>Nonlinear dynamics, stability and bifurcation analysis</li>
+        <li>Ordinary, delay and stochastic differential equation models</li>
+        <li>Optimal control of infectious-disease interventions</li>
+        <li>Parameter estimation and disease-outcome prediction</li>
+        <li>Coding theory - complementary codes and zero-correlation-zone sequences</li>
+      </ul>
+    </article>
+
+    <aside class="about-aside">
+      <Portrait size={200} class="about-portrait" />
+
+      <div class="aside-card phd-card">
+        <h2 class="aside-title">Prospective PhD students</h2>
+        <p>{profile.phdNote}</p>
+        <Button href={`mailto:${profile.email}`} size="sm" icon="email">Write to me</Button>
+      </div>
+
+      {
+        appointment && (
+          <div class="aside-card">
+            <h2 class="aside-title">Appointment</h2>
+            <p class="aside-line">
+              <strong>{appointment.title}</strong><br />
+              {appointment.organization}
+            </p>
+          </div>
+        )
+      }
+
+      <div class="aside-card">
+        <h2 class="aside-title">Professional societies</h2>
+        <ul class="aside-list">
+          {
+            nasi && (
+              <li>
+                <span>{nasi.title}, {nasi.org}</span>
+                <span class="aside-date">{nasi.yearStart}–present</span>
+              </li>
+            )
+          }
+          {
+            society.map((s) => (
+              <li>
+                <span>{s.title}, {s.organization}</span>
+                <span class="aside-date">{formatRange(s.startDate, s.endDate, s.isCurrent)}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="aside-card">
+        <h2 class="aside-title">Fellowships</h2>
+        <ul class="aside-list">
+          {
+            fellowships.map((f) => (
+              <li>
+                <span>{f.title}</span>
+                <span class="aside-date">{f.year ?? `${f.yearStart}–${f.yearEnd ?? ''}`}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <a class="more-link" href="/awards">
+        Full awards &amp; service record <Icon name="arrow-right" size={14} />
+      </a>
+    </aside>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-intro {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1.5rem;
+  }
+  .page-intro h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+  .intro-lead {
+    margin-top: 1rem;
+    max-width: 42rem;
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+  /* Keep the headline on one line on desktop; allow wrapping on small screens. */
+  @media (min-width: 60rem) {
+    .page-intro h1 {
+      white-space: nowrap;
+    }
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-bottom: 2rem;
+    align-items: start;
+  }
+  .about-body {
+    max-width: 44rem;
+  }
+  .about-body .lead {
+    font-size: var(--text-lg);
+    color: var(--color-ink);
+  }
+
+  .about-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: sticky;
+    top: calc(var(--nav-h) + 1.5rem);
+  }
+  .about-aside :global(.about-portrait) {
+    margin-bottom: 0.25rem;
+  }
+  .aside-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+  }
+  .phd-card {
+    background: var(--color-primary-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+  .phd-card p {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+    line-height: 1.55;
+    margin-bottom: 0.9rem;
+  }
+  .aside-title {
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-ink-faint);
+    margin-bottom: 0.7rem;
+  }
+  .aside-line {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+  }
+  .aside-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .aside-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    font-size: 0.88rem;
+    color: var(--color-ink-soft);
+    line-height: 1.45;
+  }
+  .aside-date {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-ink-faint);
+  }
+  .more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .more-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 56rem) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+    .about-aside {
+      position: static;
+    }
+  }
+</style>

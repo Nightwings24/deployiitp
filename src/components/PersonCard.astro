@@ -1,0 +1,139 @@
+---
+import Icon from './Icon.astro';
+import Tag from './Tag.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  person: CollectionEntry<'people'>['data'];
+}
+const { person } = Astro.props;
+
+const ROLE_LABEL: Record<string, string> = {
+  PI: 'Principal Investigator',
+  PostDoc: 'Post-doc',
+  PhD: 'PhD',
+  MTech: 'M.Tech',
+  MSc: 'M.Sc',
+};
+
+// Completed PhDs are addressed as "Dr.".
+const isDoctor = person.status === 'alumni' && person.role === 'PhD';
+const displayName = isDoctor ? `Dr. ${person.name}` : person.name;
+
+// Timeline string under the name.
+let timeline = '';
+if (person.status === 'current') {
+  timeline = person.yearJoined ? `Joined ${person.yearJoined}` : (person.period ?? '');
+} else {
+  timeline = person.period ?? (person.yearGraduated ? `Graduated ${person.yearGraduated}` : '');
+}
+const initials = person.name
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((w) => w[0]?.toUpperCase() ?? '')
+  .join('');
+---
+
+<article class="person-card">
+  <div class="person-head">
+    <span class="avatar" aria-hidden="true">{initials}</span>
+    <div class="person-id">
+      <h3 class="person-name">{displayName}</h3>
+      <div class="person-tags">
+        <Tag variant="role">{ROLE_LABEL[person.role] ?? person.role}</Tag>
+        {timeline && <span class="person-timeline">{timeline}</span>}
+      </div>
+    </div>
+  </div>
+
+  {person.currentPosition && <p class="person-position">{person.currentPosition}</p>}
+  {person.note && <p class="person-note">{person.note}</p>}
+  {
+    person.coAdvisor && (
+      <p class="person-note">
+        <span class="muted">Co-advised with</span> {person.coAdvisor}
+      </p>
+    )
+  }
+
+  {
+    person.profileUrl && (
+      <a class="person-link" href={person.profileUrl} target="_blank" rel="noopener noreferrer">
+        Profile <Icon name="arrow-up-right" size={15} />
+      </a>
+    )
+  }
+</article>
+
+<style>
+  .person-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    height: 100%;
+  }
+  .person-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .person-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .person-tags {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.3rem;
+  }
+  .person-timeline {
+    font-size: 0.82rem;
+    color: var(--color-ink-faint);
+  }
+  .person-position {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+    line-height: 1.5;
+  }
+  .person-note {
+    font-size: 0.85rem;
+    color: var(--color-ink-faint);
+  }
+  .person-note .muted {
+    color: var(--color-ink-faint);
+  }
+  .person-link {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding-top: 0.25rem;
+  }
+  .person-link:hover {
+    text-decoration: underline;
+  }
+</style>

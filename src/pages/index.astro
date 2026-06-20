@@ -1,0 +1,526 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import Card from '../components/Card.astro';
+import Button from '../components/Button.astro';
+import Tag from '../components/Tag.astro';
+import Icon from '../components/Icon.astro';
+import Portrait from '../components/Portrait.astro';
+import ProfileLinks from '../components/ProfileLinks.astro';
+import PublicationItem from '../components/PublicationItem.astro';
+import PhasePortrait from '../components/PhasePortrait.astro';
+import JsonLd from '../components/JsonLd.astro';
+import { profile, fullName, ORCID_ID } from '../lib/profile';
+import { formatRange } from '../lib/format';
+import {
+  getCurrentTitles,
+  getCurrentRoles,
+  getResearch,
+  getFeaturedPublications,
+  getPublications,
+  publicationCounts,
+  getAwards,
+  getNews,
+  countByTopics,
+} from '../lib/content';
+
+const currentTitles = await getCurrentTitles();
+const currentRoles = await getCurrentRoles();
+const research = await getResearch();
+const allPubs = await getPublications();
+const counts = publicationCounts(allPubs);
+const featured = await getFeaturedPublications(4);
+const awards = await getAwards();
+const topAwards = awards.slice(0, 5);
+const news = await getNews(3);
+
+const newsDate = (d: Date) =>
+  d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+
+// JSON-LD Person - helps him rank for his own name.
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: fullName,
+  jobTitle: currentTitles.map((t) => t.title).join(', '),
+  affiliation: { '@type': 'Organization', name: profile.institution },
+  email: `mailto:${profile.email}`,
+  url: new URL('/', Astro.site).href,
+  image: new URL('/og/default.png', Astro.site).href,
+  identifier: { '@type': 'PropertyValue', propertyID: 'ORCID', value: ORCID_ID },
+  sameAs: [`https://orcid.org/${ORCID_ID}`, ...profile.links.filter((l) => /^https?:/.test(l.url)).map((l) => l.url)],
+  knowsAbout: research.map((r) => r.data.title),
+};
+---
+
+<BaseLayout>
+  <JsonLd slot="head" data={personLd} />
+
+  <!-- ============ Hero ============ -->
+  <section class="hero">
+    <div class="container-page hero-inner">
+      <div class="hero-text">
+        <p class="eyebrow">{profile.labName} · {profile.institution}</p>
+        <h1 class="hero-name">{fullName}</h1>
+        <p class="hero-titles">
+          {
+            currentTitles.map((t, i) => (
+              <>
+                {i > 0 && <span class="sep"> · </span>}
+                <span>{t.title}{t.category === 'appointment' ? `, ${profile.department}` : ''}</span>
+              </>
+            ))
+          }
+        </p>
+        <p class="hero-summary">{profile.researchSummary}</p>
+
+        <div class="hero-actions">
+          <Button href="/research" iconRight="arrow-right">Explore research</Button>
+          <Button href="/publications" variant="secondary">
+            {counts.total} publications
+          </Button>
+          {profile.cv && <Button href={profile.cv} variant="ghost" icon="download">CV</Button>}
+        </div>
+
+        <ProfileLinks variant="icons" class="hero-links" />
+      </div>
+
+      <div class="hero-media">
+        <div class="hero-portrait-wrap">
+          <PhasePortrait class="hero-bg" />
+          <Portrait size={240} eager={true} class="hero-portrait" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Currently ============ -->
+  <section class="container-page band">
+    <h2 class="band-title"><span class="dot" aria-hidden="true"></span>Currently</h2>
+    <ul class="currently-list">
+      {
+        currentRoles.map((role) => (
+          <li>
+            <span class="currently-role">{role.title}</span>
+            <span class="currently-org">{role.organization}</span>
+            <span class="currently-date">{formatRange(role.startDate, role.endDate, role.isCurrent)}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- ============ Research themes ============ -->
+  <section class="container-page section">
+    <SectionHeader
+      eyebrow="Research"
+      title="What I work on"
+      description="Mathematical models that turn the messy behaviour of diseases and ecosystems into systems we can analyse - and learn from."
+    />
+    <div class="research-grid">
+      {
+        research.map((area) => {
+          const n = countByTopics(allPubs, area.data.relatedTopics);
+          return (
+            <Card interactive={true} as="article" class="research-card">
+              <span class="research-icon" aria-hidden="true">
+                <Icon name={area.data.icon ?? 'curve'} size={22} />
+              </span>
+              <h3 class="research-title">
+                <a href={`/research#${area.id}`}>{area.data.title}</a>
+              </h3>
+              <p class="research-summary">{area.data.summary}</p>
+              {n > 0 && (
+                <a class="research-count" href={`/publications?topic=${encodeURIComponent(area.data.relatedTopics[0])}`}>
+                  {n} publication{n === 1 ? '' : 's'} <Icon name="arrow-right" size={14} />
+                </a>
+              )}
+            </Card>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <!-- ============ Selected publications ============ -->
+  <section class="container-page section">
+    <div class="section-head-row">
+      <SectionHeader
+        eyebrow="Selected work"
+        title="Highlighted publications"
+        class="no-margin"
+      />
+      <Button href="/publications" variant="secondary" iconRight="arrow-right" class="head-action">
+        All {counts.total}
+      </Button>
+    </div>
+    <div class="featured-list">
+      {featured.map((pub) => <PublicationItem pub={pub} />)}
+    </div>
+    <p class="pub-tally">
+      {counts.journal} journal articles · {counts.chaptersAndProceedings} chapters &amp; proceedings
+    </p>
+  </section>
+
+  <!-- ============ Awards + News ============ -->
+  <section class="container-page section two-col">
+    <div>
+      <SectionHeader eyebrow="Recognition" title="Selected awards" />
+      <ul class="award-list">
+        {
+          topAwards.map((a) => (
+            <li>
+              <span class="award-year">{a.year ?? a.yearStart}</span>
+              <div>
+                <p class="award-title">{a.title}</p>
+                {a.org && <p class="award-org">{a.org}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="more-link" href="/awards">All awards &amp; service <Icon name="arrow-right" size={14} /></a>
+    </div>
+    <div>
+      <SectionHeader eyebrow="News" title="Recent updates" />
+      <ul class="news-list">
+        {
+          news.map((n) => (
+            <li>
+              <span class="news-date">{newsDate(n.date)}</span>
+              <p class="news-title">{n.link ? <a href={n.link}>{n.title}</a> : n.title}</p>
+              {n.summary && <p class="news-summary">{n.summary}</p>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ Contact CTA ============ -->
+  <section class="container-page section">
+    <Card class="cta">
+      <div class="cta-text">
+        <Tag variant="status">Open to PhD students</Tag>
+        <h2 class="cta-title">Interested in mathematical modelling?</h2>
+        <p class="cta-body">{profile.phdNote}</p>
+      </div>
+      <div class="cta-actions">
+        <Button href={`mailto:${profile.email}`} icon="email">Email me</Button>
+        <Button href="/contact" variant="secondary">Contact details</Button>
+      </div>
+    </Card>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .hero-name {
+    font-size: var(--text-4xl);
+    margin: 0.5rem 0 0.4rem;
+    color: var(--color-primary);
+  }
+  .hero-titles {
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    font-family: var(--font-serif);
+    margin-bottom: 1.1rem;
+  }
+  .hero-titles .sep {
+    color: var(--color-line-strong);
+  }
+  .hero-summary {
+    font-size: var(--text-lg);
+    line-height: 1.6;
+    color: var(--color-ink);
+    max-width: 36rem;
+    margin-bottom: 1.75rem;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-media {
+    display: flex;
+    justify-content: center;
+  }
+  .hero-portrait-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+  }
+  /* :global() - .hero-bg is on the <PhasePortrait> <svg> root, outside this
+     component's style scope. */
+  .hero-portrait-wrap :global(.hero-bg) {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero-portrait-wrap :global(.hero-portrait) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Currently band */
+  .band {
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    padding-block: 1.5rem;
+  }
+  .band-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-faint);
+    margin-bottom: 1rem;
+  }
+  .band-title .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+  .currently-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.85rem 1.5rem;
+  }
+  .currently-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--color-line-strong);
+  }
+  .currently-role {
+    font-weight: 600;
+    color: var(--color-ink);
+    font-size: 0.95rem;
+  }
+  .currently-org {
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+  .currently-date {
+    font-size: 0.8rem;
+    color: var(--color-ink-faint);
+    font-family: var(--font-mono);
+  }
+
+  /* Sections */
+  .section {
+    padding-block: clamp(3rem, 7vw, 5rem);
+  }
+  .section-head-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .section-head-row :global(.no-margin) {
+    margin-bottom: 0;
+  }
+
+  .research-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+    gap: 1.25rem;
+  }
+  .research-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .research-icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    margin-bottom: 0.25rem;
+  }
+  .research-title {
+    font-size: 1.2rem;
+  }
+  .research-title a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .research-title a:hover {
+    color: var(--color-link);
+  }
+  .research-summary {
+    color: var(--color-ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+  .research-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-link);
+    text-decoration: none;
+    margin-top: 0.25rem;
+  }
+  .research-count:hover {
+    text-decoration: underline;
+  }
+
+  .featured-list {
+    border-top: 1px solid var(--color-line);
+  }
+  .pub-tally {
+    margin-top: 1.25rem;
+    color: var(--color-ink-faint);
+    font-size: 0.9rem;
+  }
+
+  /* Awards + news */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  .award-list,
+  .news-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .award-list li {
+    display: flex;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .award-year {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--color-accent);
+    font-weight: 500;
+    flex: none;
+    width: 3.2rem;
+    padding-top: 0.1rem;
+  }
+  .award-title {
+    font-weight: 600;
+    color: var(--color-ink);
+    line-height: 1.4;
+  }
+  .award-org {
+    font-size: 0.85rem;
+    color: var(--color-ink-soft);
+  }
+  .news-list li {
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .news-date {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--color-ink-faint);
+    text-transform: uppercase;
+  }
+  .news-title {
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 0.15rem;
+  }
+  .news-title a {
+    color: var(--color-ink);
+  }
+  .news-summary {
+    font-size: 0.9rem;
+    color: var(--color-ink-soft);
+    line-height: 1.5;
+    margin-top: 0.2rem;
+  }
+  .more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .more-link:hover {
+    text-decoration: underline;
+  }
+
+  /* CTA */
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    background: var(--color-primary-soft);
+    border-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  }
+  .cta-title {
+    font-size: var(--text-2xl);
+    color: var(--color-primary);
+    margin: 0.6rem 0 0.5rem;
+  }
+  .cta-body {
+    color: var(--color-ink-soft);
+    max-width: 40rem;
+    line-height: 1.6;
+  }
+  .cta-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Responsive */
+  @media (max-width: 60rem) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+    }
+    .hero-media {
+      order: -1;
+    }
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 40rem) {
+    .hero-summary {
+      font-size: var(--text-base);
+    }
+  }
+</style>

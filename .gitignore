@@ -1,0 +1,28 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# generated API caches (re-fetched by the ingestion scripts)
+seed/cache/
+
+# local env / secrets
+.env
+.env.local
+.env.*.local
+
+# logs & audit artifacts
+*.log
+lh-*.json
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Keystatic local clone (GitHub mode)
+.keystatic/

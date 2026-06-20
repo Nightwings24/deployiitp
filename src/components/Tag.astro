@@ -1,0 +1,56 @@
+---
+interface Props {
+  variant?: 'topic' | 'status' | 'role' | 'neutral';
+  size?: 'sm' | 'md';
+  class?: string;
+}
+const { variant = 'neutral', size = 'sm', class: className = '' } = Astro.props;
+---
+
+<span class={`tag tag-${variant} tag-${size} ${className}`}><slot /></span>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    line-height: 1.2;
+  }
+  .tag-sm {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+  }
+  .tag-md {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .tag-topic {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  }
+  .tag-status {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .tag-role {
+    background: var(--color-surface);
+    color: var(--color-ink-soft);
+    border-color: var(--color-line-strong);
+  }
+  .tag-neutral {
+    background: var(--color-surface-soft);
+    color: var(--color-ink-soft);
+  }
+</style>

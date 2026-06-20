@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+import { navItems } from '../lib/site';
+---
+
+<BaseLayout pageTitle="Page not found" noindex={true}>
+  <section class="container-prose notfound">
+    <p class="eyebrow">404</p>
+    <h1>This page wandered off.</h1>
+    <p class="notfound-lead">
+      The page you're looking for doesn't exist or may have moved. Here's the way back.
+    </p>
+    <div class="notfound-actions">
+      <Button href="/" icon="arrow-right">Go to the homepage</Button>
+      <Button href="/publications" variant="secondary">Browse publications</Button>
+    </div>
+    <nav class="notfound-nav" aria-label="All pages">
+      {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-block: clamp(4rem, 12vw, 8rem);
+    text-align: center;
+  }
+  .notfound h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin: 0.5rem 0 1rem;
+  }
+  .notfound-lead {
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    max-width: 32rem;
+    margin: 0 auto 2rem;
+  }
+  .notfound-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+  .notfound-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-line);
+  }
+  .notfound-nav a {
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .notfound-nav a:hover {
+    color: var(--color-link);
+    text-decoration: underline;
+  }
+</style>

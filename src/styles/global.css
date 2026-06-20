@@ -1,0 +1,287 @@
+/* =============================================================================
+   Dr. Prashant K. Srivastava - academic portfolio
+   Design system: warm-paper light theme, calm scholarly typography.
+   Tailwind v4 (CSS-first config). Tokens below become utilities automatically:
+   --color-paper -> bg-paper/text-paper, --font-serif -> font-serif, etc.
+   ============================================================================= */
+
+@import 'tailwindcss';
+
+/* Self-hosted fonts (no render-blocking external request, font-display: swap) */
+@import '@fontsource-variable/newsreader';
+@import '@fontsource-variable/inter';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+@theme {
+  /* ---- Surfaces ---- */
+  --color-paper: #fbfaf7; /* page background, warm off-white */
+  --color-surface: #ffffff; /* cards, raised areas */
+  --color-surface-soft: #f4f2ec; /* subtle fills, hover wells */
+  --color-line: #e7e4dc; /* hairline borders/dividers */
+  --color-line-strong: #d8d4c9; /* stronger dividers */
+
+  /* ---- Ink ---- */
+  --color-ink: #1a1a1e; /* primary text */
+  --color-ink-soft: #4b4b53; /* secondary text, captions */
+  --color-ink-faint: #62626b; /* tertiary, metadata - WCAG AA on paper + surface-soft */
+
+  /* ---- Brand / interactive (deep scholarly blue) ---- */
+  --color-primary: #1f3a5f;
+  --color-primary-soft: #eef2f8; /* tinted backgrounds */
+  --color-link: #2e5aac;
+  --color-link-hover: #1f3a5f;
+
+  /* ---- Accent (muted academic gold) - use sparingly ---- */
+  --color-accent: #80591c; /* darkened for WCAG AA as small text on paper + accent-soft */
+  --color-accent-soft: #f3ead9;
+
+  /* ---- Focus ---- */
+  --color-focus: #2e5aac;
+
+  /* ---- Typography ---- */
+  --font-serif: 'Newsreader Variable', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+    sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Fluid type scale (clamp: min @375px → max @1200px) */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: clamp(1.125rem, 1.05rem + 0.3vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
+  --text-3xl: clamp(1.875rem, 1.55rem + 1.4vw, 2.5rem);
+  --text-4xl: clamp(2.25rem, 1.7rem + 2.4vw, 3.25rem);
+
+  /* Reading measure */
+  --container-prose: 44rem; /* ~70ch */
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  /* Soft, paper-like shadows (low contrast, no harsh drop) */
+  --shadow-card: 0 1px 2px rgba(26, 26, 30, 0.04), 0 4px 16px rgba(26, 26, 30, 0.04);
+  --shadow-raised: 0 2px 6px rgba(26, 26, 30, 0.06), 0 12px 32px rgba(26, 26, 30, 0.07);
+}
+
+/* =============================================================================
+   Dark theme — opt-in via [data-theme="dark"] on <html> (light stays default).
+   Only the token values change; every component reads these variables, so the
+   whole UI re-themes. Values chosen to keep WCAG AA contrast.
+   ============================================================================= */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --color-paper: #14161b;
+  --color-surface: #1c1f26;
+  --color-surface-soft: #242832;
+  --color-line: #2f333d;
+  --color-line-strong: #3d424e;
+
+  /* Ink */
+  --color-ink: #eceae4;
+  --color-ink-soft: #b9b8b0;
+  --color-ink-faint: #9a998f;
+
+  /* Brand / interactive (light scholarly blue on dark) */
+  --color-primary: #aecaf1;
+  --color-primary-soft: #1e2a3f;
+  --color-link: #8fb4ee;
+  --color-link-hover: #b6cef5;
+
+  /* Accent (warm gold, lightened for dark) */
+  --color-accent: #ddbd80;
+  --color-accent-soft: #2c2614;
+
+  /* Focus */
+  --color-focus: #8fb4ee;
+
+  /* Stronger shadows so raised surfaces read on a dark background */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.36);
+  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.42), 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+/* =============================================================================
+   Base layer
+   ============================================================================= */
+@layer base {
+  :root {
+    color-scheme: light;
+    --nav-h: 4rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--nav-h) + 1rem);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+  }
+
+  /* Headings: serif, tight leading, balanced wrapping */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: var(--color-link);
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 0.06em;
+  }
+  a:hover {
+    color: var(--color-link-hover);
+  }
+
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  /* Visible, accessible focus everywhere - keyboard users only */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Honor reduced-motion: kill all non-essential animation */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* =============================================================================
+   Component utilities (small, composable - kept intentionally lean)
+   ============================================================================= */
+@layer components {
+  /* Centered content container with sane gutters at every width */
+  .container-page {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .container-prose {
+    width: 100%;
+    max-width: var(--container-prose);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.5rem);
+  }
+
+  /* Skip link - visually hidden until focused */
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -3rem;
+    z-index: 100;
+    background: var(--color-primary);
+    color: var(--color-paper);
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-md);
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    top: 1rem;
+    color: var(--color-paper);
+  }
+
+  /* Eyebrow label above section headings */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  /* Long-form prose blocks (About narrative, research descriptions) */
+  .prose-body {
+    color: var(--color-ink);
+    line-height: 1.7;
+  }
+  .prose-body p,
+  .prose-body ul,
+  .prose-body ol {
+    margin-block: 1rem;
+  }
+  .prose-body h2 {
+    font-size: var(--text-2xl);
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-body h3 {
+    font-size: var(--text-xl);
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose-body a {
+    text-decoration: underline;
+  }
+  .prose-body ul {
+    list-style: disc;
+    padding-left: 1.4rem;
+  }
+  .prose-body ol {
+    list-style: decimal;
+    padding-left: 1.4rem;
+  }
+  .prose-body li {
+    margin-block: 0.35rem;
+  }
+  .prose-body strong {
+    font-weight: 600;
+  }
+}

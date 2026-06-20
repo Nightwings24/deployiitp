@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+import { profile } from '../lib/profile';
+
+interface Props {
+  variant?: 'icons' | 'labeled';
+  class?: string;
+}
+const { variant = 'icons', class: className = '' } = Astro.props;
+
+const isExternal = (url: string) => /^https?:/.test(url);
+---
+
+<ul class={`profile-links profile-links-${variant} ${className}`}>
+  {
+    profile.links.map((link) => (
+      <li>
+        <a
+          href={link.url}
+          aria-label={link.label}
+          title={variant === 'icons' ? link.label : undefined}
+          {...(isExternal(link.url) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          <Icon name={link.icon ?? 'link'} size={variant === 'icons' ? 20 : 18} />
+          {variant === 'labeled' && <span>{link.label}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .profile-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .profile-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .profile-links a:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+  .profile-links-icons a {
+    width: 2.6rem;
+    height: 2.6rem;
+    justify-content: center;
+  }
+  .profile-links-labeled a {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+</style>

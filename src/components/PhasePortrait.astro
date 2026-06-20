@@ -1,0 +1,54 @@
+---
+/**
+ * Decorative, static phase-portrait motif - trajectories spiralling into a
+ * stable focus, with a faint limit cycle. A quiet nod to nonlinear dynamics.
+ * Purely ornamental (aria-hidden), very low opacity, no animation.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+
+const cx = 110;
+const cy = 110;
+
+// Logarithmic spiral trajectory converging to (cx, cy).
+function spiral(startR: number, startTheta: number, turns = 2.4, steps = 90): string {
+  const b = 0.23;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * turns * 2 * Math.PI;
+    const r = startR * Math.exp(-b * t);
+    const x = cx + r * Math.cos(t + startTheta);
+    const y = cy + r * Math.sin(t + startTheta);
+    d += `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)} `;
+  }
+  return d.trim();
+}
+---
+
+<svg
+  class={`phase-portrait ${className}`}
+  viewBox="0 0 220 220"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <!-- limit cycle -->
+  <ellipse cx={cx} cy={cy} rx="78" ry="62" stroke="currentColor" stroke-width="1" opacity="0.5" />
+  <!-- converging trajectories -->
+  <path d={spiral(96, 0)} stroke="currentColor" stroke-width="1.1" />
+  <path d={spiral(88, Math.PI)} stroke="currentColor" stroke-width="1.1" />
+  <path d={spiral(70, Math.PI / 2)} stroke="currentColor" stroke-width="0.9" opacity="0.7" />
+  <!-- the focus -->
+  <circle cx={cx} cy={cy} r="2.4" fill="currentColor" />
+</svg>
+
+<style>
+  .phase-portrait {
+    color: var(--color-primary);
+    opacity: 0.07;
+    width: 100%;
+    height: 100%;
+  }
+</style>

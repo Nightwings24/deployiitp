@@ -1,0 +1,316 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import Tag from '../components/Tag.astro';
+import { getResearch, getPublications, countByTopics } from '../lib/content';
+import { fullName } from '../lib/profile';
+
+const research = await getResearch();
+const allPubs = await getPublications();
+
+const sections = await Promise.all(
+  research.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+    count: countByTopics(allPubs, entry.data.relatedTopics),
+  })),
+);
+---
+
+<BaseLayout
+  pageTitle="Research"
+  description={`Research themes of ${fullName}: mathematical epidemiology, ecology and predator–prey dynamics, in-host viral dynamics, nonlinear dynamics, and coding theory.`}
+>
+  <div class="container-page page-intro">
+    <p class="eyebrow">Research</p>
+    <h1>Themes &amp; questions</h1>
+    <p class="intro-lead">
+      My research turns the behaviour of biological systems into mathematics that can be analysed.
+      Below are the threads that run through the group's work - each with a plain-language explanation
+      and a route into the publications behind it.
+    </p>
+  </div>
+
+  <div class="container-page research-layout">
+    <nav class="theme-nav" aria-label="Research themes">
+      <ul>
+        {
+          sections.map(({ entry }) => (
+            <li>
+              <a href={`#${entry.id}`}>
+                <Icon name={entry.data.icon ?? 'curve'} size={17} />
+                {entry.data.title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="theme-content">
+      {
+        sections.map(({ entry, Content, count }) => (
+          <section class="theme" id={entry.id}>
+            <header class="theme-header">
+              <span class="theme-icon" aria-hidden="true">
+                <Icon name={entry.data.icon ?? 'curve'} size={24} />
+              </span>
+              <div>
+                <h2>{entry.data.title}</h2>
+                <p class="theme-summary">{entry.data.summary}</p>
+              </div>
+            </header>
+
+            <div class="theme-prose-wrap">
+              <div class="prose-body theme-prose" id={`${entry.id}-prose`}>
+                <Content />
+              </div>
+              <button
+                class="show-more js-show-more"
+                type="button"
+                aria-expanded="false"
+                aria-controls={`${entry.id}-prose`}
+              >
+                <span class="more-label">Show more</span>
+                <span class="less-label">Show less</span>
+                <Icon name="arrow-right" size={14} class="chev" />
+              </button>
+            </div>
+
+            <div class="theme-footer">
+              <div class="theme-topics">
+                {entry.data.relatedTopics.map((t) => <Tag variant="topic">{t}</Tag>)}
+              </div>
+              {count > 0 && (
+                <a
+                  class="theme-link"
+                  href={`/publications?topic=${encodeURIComponent(entry.data.relatedTopics[0])}`}
+                >
+                  Browse {count} related publication{count === 1 ? '' : 's'}
+                  <Icon name="arrow-right" size={15} />
+                </a>
+              )}
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-intro {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1rem;
+  }
+  .page-intro h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+  .intro-lead {
+    margin-top: 1rem;
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+
+  .research-layout {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-block: 2rem 1rem;
+    align-items: start;
+  }
+  .theme-nav {
+    position: sticky;
+    top: calc(var(--nav-h) + 1.5rem);
+  }
+  .theme-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    border-left: 1px solid var(--color-line);
+  }
+  .theme-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.85rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+  .theme-nav a:hover {
+    color: var(--color-primary);
+    border-left-color: var(--color-line-strong);
+  }
+  .theme-nav :global(.icon) {
+    color: var(--color-ink-faint);
+  }
+
+  .theme-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+  .theme {
+    scroll-margin-top: calc(var(--nav-h) + 1.5rem);
+  }
+  .theme-header {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+  .theme-icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    flex: none;
+    border-radius: var(--radius-md);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+  .theme-header h2 {
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+  }
+  .theme-summary {
+    margin-top: 0.4rem;
+    color: var(--color-ink-soft);
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+  .theme-prose-wrap {
+    max-width: 46rem;
+  }
+  .theme-prose {
+    max-width: 46rem;
+  }
+  /* "Show more" toggle is desktop-hidden; the full prose always shows there. */
+  .show-more {
+    display: none;
+  }
+  .less-label {
+    display: none;
+  }
+  .theme-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-line);
+  }
+  .theme-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .theme-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .theme-link:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 56rem) {
+    .research-layout {
+      grid-template-columns: 1fr;
+    }
+    .theme-nav {
+      position: static;
+      display: none;
+    }
+  }
+
+  /* On phones, clamp each description with a fade + "Show more" toggle. */
+  @media (max-width: 48rem) {
+    .theme-prose {
+      position: relative;
+      max-height: 9.5rem;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .theme-prose::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3.5rem;
+      background: linear-gradient(transparent, var(--color-paper));
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .theme-prose.is-expanded {
+      max-height: 200rem;
+    }
+    .theme-prose.is-expanded::after {
+      opacity: 0;
+    }
+    .show-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-link);
+      background: var(--color-surface);
+      border: 1px solid var(--color-line-strong);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+    }
+    .show-more :global(.chev) {
+      transition: transform 0.2s ease;
+      transform: rotate(90deg);
+    }
+    .show-more[aria-expanded='true'] :global(.chev) {
+      transform: rotate(-90deg);
+    }
+    .show-more[aria-expanded='true'] .more-label {
+      display: none;
+    }
+    .show-more[aria-expanded='true'] .less-label {
+      display: inline;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-prose {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Collapsible research descriptions (mobile). The CSS clamps; this toggles.
+  document.querySelectorAll('.js-show-more').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('aria-controls');
+      const prose = id ? document.getElementById(id) : null;
+      if (!prose) return;
+      const expanded = prose.classList.toggle('is-expanded');
+      btn.setAttribute('aria-expanded', String(expanded));
+    });
+  });
+</script>

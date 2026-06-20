@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PersonCard from '../components/PersonCard.astro';
+import { getCurrentMembers, getAlumni } from '../lib/content';
+import { profile, fullName } from '../lib/profile';
+import type { CollectionEntry } from 'astro:content';
+
+type Person = CollectionEntry<'people'>['data'];
+
+const current = await getCurrentMembers();
+const alumni = await getAlumni();
+
+const ROLE_GROUPS: { role: Person['role']; label: string }[] = [
+  { role: 'PhD', label: 'PhD Students' },
+  { role: 'MTech', label: 'M.Tech Students' },
+  { role: 'MSc', label: 'M.Sc Students' },
+];
+const ALUMNI_GROUPS: { role: Person['role']; label: string }[] = [
+  { role: 'PhD', label: 'PhD Alumni' },
+  { role: 'MTech', label: 'M.Tech Alumni' },
+  { role: 'MSc', label: 'M.Sc Alumni' },
+];
+
+const group = (people: Person[], role: Person['role']) => people.filter((p) => p.role === role);
+---
+
+<BaseLayout
+  pageTitle="Group"
+  description={`The ${profile.labName} led by ${fullName} at ${profile.institution} - current PhD, M.Tech and M.Sc members, and alumni and their current positions.`}
+>
+  <div class="container-page page-intro">
+    <p class="eyebrow">Group</p>
+    <h1>{profile.labName}</h1>
+    <p class="intro-lead">
+      The lab brings together students working on mathematical models of biological systems and
+      nonlinear dynamics. {current.length} researchers are currently in the group, and our alumni have
+      gone on to faculty positions, post-docs and industry roles around the world.
+    </p>
+  </div>
+
+  <div class="container-page group-body">
+    <section aria-labelledby="current-heading" class="group-section">
+      <h2 id="current-heading" class="group-h2">Current members</h2>
+      {
+        ROLE_GROUPS.map(({ role, label }) => {
+          const members = group(current, role);
+          if (!members.length) return null;
+          return (
+            <div class="role-block">
+              <h3 class="role-label">
+                {label} <span class="role-count">{members.length}</span>
+              </h3>
+              <div class="people-grid">
+                {members.map((person) => (
+                  <PersonCard person={person} />
+                ))}
+              </div>
+            </div>
+          );
+        })
+      }
+    </section>
+
+    <section aria-labelledby="alumni-heading" class="group-section">
+      <h2 id="alumni-heading" class="group-h2">Alumni</h2>
+      <p class="group-sub">Where the group's graduates are now.</p>
+      {
+        ALUMNI_GROUPS.map(({ role, label }) => {
+          const members = group(alumni, role);
+          if (!members.length) return null;
+          return (
+            <div class="role-block">
+              <h3 class="role-label">
+                {label} <span class="role-count">{members.length}</span>
+              </h3>
+              <div class="people-grid">
+                {members.map((person) => (
+                  <PersonCard person={person} />
+                ))}
+              </div>
+            </div>
+          );
+        })
+      }
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page-intro {
+    padding-top: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: 1rem;
+  }
+  .page-intro h1 {
+    font-size: var(--text-4xl);
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+  .intro-lead {
+    margin-top: 1rem;
+    font-size: var(--text-lg);
+    color: var(--color-ink-soft);
+    line-height: 1.6;
+  }
+
+  .group-body {
+    padding-block: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3.5rem;
+  }
+  .group-h2 {
+    font-size: var(--text-2xl);
+    color: var(--color-ink);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .group-sub {
+    margin-top: 0.6rem;
+    color: var(--color-ink-soft);
+  }
+  .role-block {
+    margin-top: 2rem;
+  }
+  .role-label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-ink-faint);
+    margin-bottom: 1rem;
+  }
+  .role-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: var(--color-surface-soft);
+    color: var(--color-ink-soft);
+    font-size: 0.75rem;
+  }
+  .people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+</style>
